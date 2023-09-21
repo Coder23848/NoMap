@@ -10,8 +10,6 @@ namespace NoMap
         private void OnEnable()
 #pragma warning restore IDE0051
         {
-            // Plugin startup logic
-            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
             On.HUD.Map.Update += Map_Update;
             On.HUD.Map.Draw += Map_Draw;
             On.Menu.FastTravelScreen.ctor += FastTravelScreen_ctor;
@@ -56,12 +54,6 @@ namespace NoMap
         private void Map_Draw(On.HUD.Map.orig_Draw orig, HUD.Map self, float timeStacker)
         {
             // Nothing
-        }
-
-        private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
-        {
-            orig(self);
-            Debug.Log("No Map config setup: " + MachineConnector.SetRegisteredOI(PluginInfo.PLUGIN_GUID, PluginOptions.Instance));
         }
     }
 }
