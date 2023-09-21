@@ -1,0 +1,11 @@
+{
+	"id": "nomap",
+	"name": "No Map",
+	"version": "1.0.0",
+	"hide_version": false,
+	"authors": "Coder23848",
+	"description": "Removes the in-game map.",
+	"requirements": [],
+	"requirements_names": [],
+	"checksum_override_version": false
+}
