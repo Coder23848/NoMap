@@ -1,7 +1,7 @@
 {
 	"id": "nomap",
 	"name": "No Map",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"hide_version": false,
 	"authors": "Coder23848",
 	"description": "Removes the in-game map.",

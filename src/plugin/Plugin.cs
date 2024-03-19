@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using UnityEngine;
 
 namespace NoMap
 {
@@ -14,7 +13,17 @@ namespace NoMap
             On.HUD.Map.Draw += Map_Draw;
             On.Menu.FastTravelScreen.ctor += FastTravelScreen_ctor;
             On.Menu.FastTravelScreen.Update += FastTravelScreen_Update;
-            On.RWInput.PlayerInput += RWInput_PlayerInput;
+            On.RWInput.PlayerInput_int += RWInput_PlayerInput_int;
+        }
+
+        private Player.InputPackage RWInput_PlayerInput_int(On.RWInput.orig_PlayerInput_int orig, int playerNumber)
+        {
+            Player.InputPackage result = orig(playerNumber);
+            if (suppressMapButton)
+            {
+                result.mp = false;
+            }
+            return result;
         }
 
         // Suppress the map button entirely while on the region/Passage screen.
@@ -24,15 +33,6 @@ namespace NoMap
             suppressMapButton = true;
             orig(self);
             suppressMapButton = false;
-        }
-        private Player.InputPackage RWInput_PlayerInput(On.RWInput.orig_PlayerInput orig, int playerNumber, RainWorld rainWorld)
-        {
-            Player.InputPackage result = orig(playerNumber, rainWorld);
-            if (suppressMapButton)
-            {
-                result.mp = false;
-            }
-            return result;
         }
 
         // Forcing map fade to 0 removes the "open map" background effects in select/shelter/region/Passage screens.
