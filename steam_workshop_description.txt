@@ -1,4 +1,4 @@
-Removes the in-game map. Fixes all map bugs in all vanilla and modded regions.
+Removes the in-game map. Fixes all map-related bugs in all vanilla and modded regions.
 
 As a side effect, [spoiler]this mod also prevents you from selecting your destination when Passaging.[/spoiler]
 [spoiler]When Passaging to the region you are currently in, you will stay where you are and only recover your karma; when Passaging to a different region, the destination shelter will be selected at random.[/spoiler]
