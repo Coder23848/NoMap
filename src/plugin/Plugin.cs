@@ -1,4 +1,6 @@
-﻿using BepInEx;
+﻿using System;
+using BepInEx;
+using MonoMod.RuntimeDetour;
 
 namespace NoMap
 {
@@ -10,12 +12,13 @@ namespace NoMap
 #pragma warning restore IDE0051
         {
             On.HUD.Map.Update += Map_Update;
-            On.HUD.Map.Draw += Map_Draw;
             On.Menu.FastTravelScreen.ctor += FastTravelScreen_ctor;
             On.Menu.FastTravelScreen.Update += FastTravelScreen_Update;
             On.RWInput.PlayerInput_int += RWInput_PlayerInput_int;
+            _ = new Hook(typeof(Menu.SleepAndDeathScreen).GetMethod("get_RevealMap"), SleepAndDeathScreen_get_RevealMap);
         }
 
+        static bool suppressMapButton = false;
         private Player.InputPackage RWInput_PlayerInput_int(On.RWInput.orig_PlayerInput_int orig, int playerNumber)
         {
             Player.InputPackage result = orig(playerNumber);
@@ -27,7 +30,6 @@ namespace NoMap
         }
 
         // Suppress the map button entirely while on the region/Passage screen.
-        bool suppressMapButton = false;
         private void FastTravelScreen_Update(On.Menu.FastTravelScreen.orig_Update orig, Menu.FastTravelScreen self)
         {
             suppressMapButton = true;
@@ -39,7 +41,10 @@ namespace NoMap
         private void Map_Update(On.HUD.Map.orig_Update orig, HUD.Map self)
         {
             orig(self);
+            self.fadeCounter = 0;
             self.fade = 0;
+            self.lastFade = 0;
+            self.visible = false;
         }
 
         // Remove the prompts in the Regions/Passage screen telling you to open the map.
@@ -50,10 +55,10 @@ namespace NoMap
             self.mapButtonPrompt.label.Redraw(false, false);
         }
 
-        // Prevents the map from showing up.
-        private void Map_Draw(On.HUD.Map.orig_Draw orig, HUD.Map self, float timeStacker)
+        // Removes the "open map" background effect on the sleep/death screen.
+        private bool SleepAndDeathScreen_get_RevealMap(Func<Menu.SleepAndDeathScreen, bool> orig, Menu.SleepAndDeathScreen self)
         {
-            // Nothing
+            return false;
         }
     }
 }
