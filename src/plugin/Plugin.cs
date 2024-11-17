@@ -1,5 +1,7 @@
 ﻿using System;
 using BepInEx;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 
 namespace NoMap
@@ -16,6 +18,8 @@ namespace NoMap
             On.Menu.FastTravelScreen.Update += FastTravelScreen_Update;
             On.RWInput.PlayerInput_int += RWInput_PlayerInput_int;
             _ = new Hook(typeof(Menu.SleepAndDeathScreen).GetMethod("get_RevealMap"), SleepAndDeathScreen_get_RevealMap);
+
+            IL.HUD.ExpeditionHUD.Update += ExpeditionHUD_Update;
         }
 
         static bool suppressMapButton = false;
@@ -55,10 +59,31 @@ namespace NoMap
             self.mapButtonPrompt.label.Redraw(false, false);
         }
 
-        // Removes the "open map" background effect on the sleep/death screen.
+        // Remove the "open map" background effect on the sleep/death screen.
         private bool SleepAndDeathScreen_get_RevealMap(Func<Menu.SleepAndDeathScreen, bool> orig, Menu.SleepAndDeathScreen self)
         {
             return false;
+        }
+
+        // Change the criteria for displaying the expedition challenge list to not be dependent on the map being visible.
+        private void ExpeditionHUD_Update(MonoMod.Cil.ILContext il)
+        {
+            ILCursor cursor = new(il);
+            if (cursor.TryGotoNext(MoveType.After,
+                x => x.MatchLdarg(0),
+                x => x.MatchLdfld<HUD.ExpeditionHUD>(nameof(HUD.ExpeditionHUD.pendingUpdates))))
+            {
+                cursor.Emit(OpCodes.Ldarg_0);
+                static bool ExpeditionHUD_UpdateDelegate(bool orig, HUD.ExpeditionHUD self) // Apparently declaring the delegate beforehand is very slightly faster.
+                {
+                    return orig || self.hud.owner.RevealMap;
+                };
+                cursor.EmitDelegate(ExpeditionHUD_UpdateDelegate);
+            }
+            else
+            {
+                Logger.LogError("Failed to hook ExpeditionHUD.Update: no match found.");
+            }
         }
     }
 }
